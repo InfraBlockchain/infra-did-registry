@@ -4,6 +4,44 @@ using namespace eosio;
 
 namespace infra_did {
 
+void infra_did_registry::accsetattr( const name& account, const string& key, const string& value ) {
+   check( is_account(account), "account not exists" );
+   check( key.size() > 0, "empty key" );
+
+   require_auth( account );
+   account_did_attr_table acc_did_attr_db( get_self(), get_self().value );
+   auto itr = acc_did_attr_db.find( account.value );
+
+   if ( itr == acc_did_attr_db.end() ) {
+      acc_did_attr_db.emplace( account, [&]( account_did_attr& acc_did_attr ) {
+         acc_did_attr.account = account;
+         if (!value.empty()) {
+            acc_did_attr.attr[key] = value;
+         }
+      });
+   } else {
+      acc_did_attr_db.modify( itr, same_payer, [&]( account_did_attr& acc_did_attr ) {
+         if (!value.empty()) {
+            acc_did_attr.attr[key] = value;
+         } else {
+            acc_did_attr.attr.erase(key);
+         }
+      });
+   }
+}
+
+void infra_did_registry::accclearattr( const name& account ) {
+   check( is_account(account), "account not exists" );
+
+   require_auth( account );
+
+   account_did_attr_table acc_did_attr_db( get_self(), get_self().value );
+   auto itr = acc_did_attr_db.find( account.value );
+   if ( itr != acc_did_attr_db.end() ) {
+      acc_did_attr_db.erase(itr);
+   }
+}
+
 void infra_did_registry::pksetattr( const public_key& pk, const string& key, const string& value, const signature& sig, const name& ram_payer ) {
 
    check(pk.index() <= 1, "not supported public key type" );

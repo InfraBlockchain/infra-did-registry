@@ -22,6 +22,24 @@ namespace infra_did {
          using contract::contract;
 
          /**
+          * [Account DID] set attribute for a DID
+          *
+          * @param account
+          * @param key
+          * @param value
+          */
+         [[eosio::action]]
+         void accsetattr( const name& account, const string& key, const string& value );
+
+         /**
+          * [Account DID] clear attributes for a DID
+          *
+          * @param account
+          */
+         [[eosio::action]]
+         void accclearattr( const name& account );
+
+         /**
           * [Public Key DID] set attribute for a DID
           *
           * @param pk
