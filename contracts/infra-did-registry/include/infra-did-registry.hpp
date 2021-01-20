@@ -24,7 +24,7 @@ namespace infra_did {
          /**
           * [Public Key DID] set attribute for a DID
           *
-          * @param pkid
+          * @param pk
           * @param key
           * @param value
           * @param sig
@@ -33,9 +33,32 @@ namespace infra_did {
          [[eosio::action]]
          void pksetattr( const public_key& pk, const string& key, const string& value, const signature& sig, const name& ram_payer );
 
+         /**
+          * [Public Key DID] change owner
+          *
+          * @param pk
+          * @param new_owner_pk
+          * @param sig
+          * @param ram_payer
+          */
+         [[eosio::action]]
+         void pkchowner( const public_key& pk, const public_key& new_owner_pk, const signature& sig, const name& ram_payer );
+
+         /**
+          * [Public Key DID] clear did data
+          *
+          * @param pk
+          * @param sig
+          */
+         [[eosio::action]]
+         void pkdidclear( const public_key& pk, const signature& sig );
+
       private:
 
          checksum256 pksetattr_sig_digest( const public_key& pk, const uint16_t nonce, const string& key, const string& value );
+         checksum256 pkchowner_sig_digest( const public_key& pk, const uint16_t nonce, const public_key& new_owner_pk );
+         checksum256 pkdidclear_sig_digest( const public_key& pk, const uint16_t nonce );
+
          void check_pk_did_signature( const uint64_t pkid, const public_key& pk, const checksum256& digest, const signature& sig );
 
          // saving DID-related attributes (optional) for the DIDs using chain account
