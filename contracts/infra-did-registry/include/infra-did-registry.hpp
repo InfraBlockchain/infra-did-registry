@@ -127,7 +127,7 @@ namespace infra_did {
 
          typedef eosio::multi_index< "pkdidowner"_n, pub_key_did_owner > pub_key_did_owner_table;
 
-         struct [[eosio::table]] global_state {
+         struct [[eosio::table("global")]] global_state {
             global_state() { }
             uint64_t next_pkid;
 
