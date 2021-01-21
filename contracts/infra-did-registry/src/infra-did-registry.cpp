@@ -187,7 +187,7 @@ checksum256 infra_did_registry::pkchowner_sig_digest( const public_key& pk, cons
    string prefix;
    prefix.append(INFRA_DID_PUB_KEY_DID_SIGN_DATA_PREFIX);
    prefix.append("pkchowner" );
-   size_t signed_data_size = prefix.size() + pack_size(pk) + pack_size(new_owner_pk);
+   size_t signed_data_size = prefix.size() + pack_size(pk) + 2 + pack_size(new_owner_pk);
    std::vector<char> signed_data;
    signed_data.resize(signed_data_size);
 
@@ -204,7 +204,7 @@ checksum256 infra_did_registry::pkdidclear_sig_digest( const public_key& pk, con
    string prefix;
    prefix.append(INFRA_DID_PUB_KEY_DID_SIGN_DATA_PREFIX);
    prefix.append("pkdidclear" );
-   size_t signed_data_size = prefix.size() + pack_size(pk);
+   size_t signed_data_size = prefix.size() + pack_size(pk) + 2;
    std::vector<char> signed_data;
    signed_data.resize(signed_data_size);
 
