@@ -158,7 +158,7 @@ infra_did_registry::pub_key_id_t infra_did_registry::get_pub_key_id_info( const 
    auto pk_index = pk_did_db.get_index<"bypk"_n>();
    auto itr_pk_idx = pk_index.lower_bound(get_pubkey_index_value(pk));
 
-   if ( itr_pk_idx != pk_index.end() ) {
+   if ( itr_pk_idx != pk_index.end() && itr_pk_idx->pk == pk ) {
       return pub_key_id_t{ itr_pk_idx->pkid, itr_pk_idx->nonce };
    } else {
       return pub_key_id_t{ 0, 0 };
@@ -242,6 +242,7 @@ uint64_t infra_did_registry::get_next_pkid() {
    } else {
       global_state state;
       state.next_pkid = 2;
+      global.set( state, get_self() );
    }
 
    return next_id;
