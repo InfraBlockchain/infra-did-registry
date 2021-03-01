@@ -131,7 +131,7 @@ void infra_did_registry::pkchowner( const public_key& pk, const public_key& new_
    }
 }
 
-void infra_did_registry::pkrevokedid( const public_key& pk, const signature& sig, const name& ram_payer ) {
+void infra_did_registry::pkdidrevoke( const public_key& pk, const signature& sig, const name& ram_payer ) {
 
    check(pk.index() <= 1, "not supported public key type" );
 
@@ -254,10 +254,10 @@ checksum256 infra_did_registry::pkdidclear_sig_digest( const public_key& pk, con
    return sha256(signed_data.data(), signed_data_size);
 }
 
-checksum256 infra_did_registry::pkrevokedid_sig_digest( const public_key& pk, const uint16_t nonce ) {
+checksum256 infra_did_registry::pkdidrevoke_sig_digest( const public_key& pk, const uint16_t nonce ) {
    string prefix;
    prefix.append(INFRA_DID_PUB_KEY_DID_SIGN_DATA_PREFIX);
-   prefix.append("pkrevokedid" );
+   prefix.append("pkdidrevoke" );
    size_t signed_data_size = prefix.size() + pack_size(pk) + 2;
    std::vector<char> signed_data;
    signed_data.resize(signed_data_size);

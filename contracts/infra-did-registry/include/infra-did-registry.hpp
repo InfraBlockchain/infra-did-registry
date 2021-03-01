@@ -70,7 +70,7 @@ namespace infra_did {
           * @param ram_payer
           */
          [[eosio::action]]
-         void pkrevokedid( const public_key& pk, const signature& sig, const name& ram_payer );
+         void pkdidrevoke( const public_key& pk, const signature& sig, const name& ram_payer );
 
          /**
           * [Public Key DID] clear did data
@@ -86,7 +86,7 @@ namespace infra_did {
          checksum256 pksetattr_sig_digest( const public_key& pk, const uint16_t nonce, const string& key, const string& value );
          checksum256 pkchowner_sig_digest( const public_key& pk, const uint16_t nonce, const public_key& new_owner_pk );
          checksum256 pkdidclear_sig_digest( const public_key& pk, const uint16_t nonce );
-         checksum256 pkrevokedid_sig_digest( const public_key& pk, const uint16_t nonce );
+         checksum256 pkdidrevoke_sig_digest( const public_key& pk, const uint16_t nonce );
 
          void check_pk_did_signature( const uint64_t pkid, const public_key& pk, const checksum256& digest, const signature& sig );
 
