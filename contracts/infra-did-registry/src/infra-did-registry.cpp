@@ -48,6 +48,7 @@ void infra_did_registry::pksetattr( const public_key& pk, const string& key, con
    check( key.size() > 0, "empty key" );
 
    pub_key_id_t pub_key_info = get_pub_key_id_info( pk );
+   check( pub_key_info.nonce != INFRA_DID_NONCE_VALUE_FOR_REVOKED_PUB_KEY_DID, "revoked did" );
 
    const checksum256 sig_digest = pksetattr_sig_digest( pk, pub_key_info.nonce, key, value );
    check_pk_did_signature( pub_key_info.pkid, pk, sig_digest, sig );
@@ -86,6 +87,7 @@ void infra_did_registry::pkchowner( const public_key& pk, const public_key& new_
    check(new_owner_pk.index() <= 1, "not supported public key type - new_owner_pk" );
 
    pub_key_id_t pub_key_info = get_pub_key_id_info( pk );
+   check( pub_key_info.nonce != INFRA_DID_NONCE_VALUE_FOR_REVOKED_PUB_KEY_DID, "revoked did" );
 
    const checksum256 sig_digest = pkchowner_sig_digest( pk, pub_key_info.nonce, new_owner_pk );
    check_pk_did_signature( pub_key_info.pkid, pk, sig_digest, sig );
@@ -129,11 +131,47 @@ void infra_did_registry::pkchowner( const public_key& pk, const public_key& new_
    }
 }
 
+void infra_did_registry::pkrevokedid( const public_key& pk, const signature& sig, const name& ram_payer ) {
+
+   check(pk.index() <= 1, "not supported public key type" );
+
+   pub_key_id_t pub_key_info = get_pub_key_id_info( pk );
+   check( pub_key_info.nonce != INFRA_DID_NONCE_VALUE_FOR_REVOKED_PUB_KEY_DID, "already revoked did" );
+
+   const checksum256 sig_digest = pkrevokedid_sig_digest( pk, pub_key_info.nonce );
+   check_pk_did_signature( pub_key_info.pkid, pk, sig_digest, sig );
+
+   pub_key_did_table pk_did_db( get_self(), get_self().value );
+
+   if ( pub_key_info.pkid == 0 ) {
+      uint64_t pkid = get_next_pkid();
+
+      pk_did_db.emplace( ram_payer, [&]( pub_key_did& pk_did ) {
+         pk_did.pkid = pkid;
+         pk_did.pk = pk;
+         pk_did.nonce = INFRA_DID_NONCE_VALUE_FOR_REVOKED_PUB_KEY_DID;
+      });
+   } else {
+      auto itr = pk_did_db.find(pub_key_info.pkid);
+      pk_did_db.modify( itr, same_payer, [&]( pub_key_did& pk_did ) {
+         pk_did.nonce = INFRA_DID_NONCE_VALUE_FOR_REVOKED_PUB_KEY_DID;
+         pk_did.attr.clear();
+      });
+
+      pub_key_did_owner_table pk_did_owner_db( get_self(), get_self().value );
+      auto itr_pk_did_owner = pk_did_owner_db.find(pub_key_info.pkid);
+      if ( itr_pk_did_owner != pk_did_owner_db.end() ) {
+         pk_did_owner_db.erase(itr_pk_did_owner);
+      }
+   }
+}
+
 void infra_did_registry::pkdidclear( const public_key& pk, const signature& sig ) {
 
    check(pk.index() <= 1, "not supported public key type" );
 
    pub_key_id_t pub_key_info = get_pub_key_id_info( pk );
+   check( pub_key_info.nonce != INFRA_DID_NONCE_VALUE_FOR_REVOKED_PUB_KEY_DID, "revoked did" );
 
    const checksum256 sig_digest = pkdidclear_sig_digest( pk, pub_key_info.nonce );
    check_pk_did_signature( pub_key_info.pkid, pk, sig_digest, sig );
@@ -204,6 +242,22 @@ checksum256 infra_did_registry::pkdidclear_sig_digest( const public_key& pk, con
    string prefix;
    prefix.append(INFRA_DID_PUB_KEY_DID_SIGN_DATA_PREFIX);
    prefix.append("pkdidclear" );
+   size_t signed_data_size = prefix.size() + pack_size(pk) + 2;
+   std::vector<char> signed_data;
+   signed_data.resize(signed_data_size);
+
+   datastream<char*> ds( signed_data.data(), signed_data.size() );
+   ds.write(prefix.c_str(), prefix.size());
+   ds << pk;
+   ds << nonce;
+
+   return sha256(signed_data.data(), signed_data_size);
+}
+
+checksum256 infra_did_registry::pkrevokedid_sig_digest( const public_key& pk, const uint16_t nonce ) {
+   string prefix;
+   prefix.append(INFRA_DID_PUB_KEY_DID_SIGN_DATA_PREFIX);
+   prefix.append("pkrevokedid" );
    size_t signed_data_size = prefix.size() + pack_size(pk) + 2;
    std::vector<char> signed_data;
    signed_data.resize(signed_data_size);

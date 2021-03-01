@@ -7,6 +7,7 @@
 #include <string>
 
 #define INFRA_DID_PUB_KEY_DID_SIGN_DATA_PREFIX "infra-mainnet"
+#define INFRA_DID_NONCE_VALUE_FOR_REVOKED_PUB_KEY_DID 65535
 
 using namespace eosio;
 
@@ -63,6 +64,15 @@ namespace infra_did {
          void pkchowner( const public_key& pk, const public_key& new_owner_pk, const signature& sig, const name& ram_payer );
 
          /**
+          * [Public Key DID] revoke did
+          * @param pk
+          * @param sig
+          * @param ram_payer
+          */
+         [[eosio::action]]
+         void pkrevokedid( const public_key& pk, const signature& sig, const name& ram_payer );
+
+         /**
           * [Public Key DID] clear did data
           *
           * @param pk
@@ -76,11 +86,12 @@ namespace infra_did {
          checksum256 pksetattr_sig_digest( const public_key& pk, const uint16_t nonce, const string& key, const string& value );
          checksum256 pkchowner_sig_digest( const public_key& pk, const uint16_t nonce, const public_key& new_owner_pk );
          checksum256 pkdidclear_sig_digest( const public_key& pk, const uint16_t nonce );
+         checksum256 pkrevokedid_sig_digest( const public_key& pk, const uint16_t nonce );
 
          void check_pk_did_signature( const uint64_t pkid, const public_key& pk, const checksum256& digest, const signature& sig );
 
          // saving DID-related attributes (optional) for the DIDs using chain account
-         // is there is no account_did entiry matching a chain account, DIDDoc is composed using only chain account info.
+         // if there is no account_did entry matching a chain account, DIDDoc is composed using only chain account info.
          struct [[eosio::table]] account_did_attr {
             name  account;
             std::map<std::string, std::string> attr;
@@ -92,8 +103,8 @@ namespace infra_did {
 
          struct [[eosio::table]] pub_key_did {
             uint64_t   pkid; // public key id
-            public_key pk; // only support ecc_public_key(secp256k1, secp256r1) (33 bytes compressed key format)
-            uint16_t nonce;
+            public_key pk; // only supports ecc_public_key(secp256k1, secp256r1) (33 bytes compressed key format)
+            uint16_t   nonce; // allows upto 65535 update transactions per a pub-key did
             std::map<string, string> attr;
 
             uint64_t primary_key() const { return pkid; }
