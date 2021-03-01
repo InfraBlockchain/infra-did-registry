@@ -138,7 +138,7 @@ void infra_did_registry::pkdidrevoke( const public_key& pk, const signature& sig
    pub_key_id_t pub_key_info = get_pub_key_id_info( pk );
    check( pub_key_info.nonce != INFRA_DID_NONCE_VALUE_FOR_REVOKED_PUB_KEY_DID, "already revoked did" );
 
-   const checksum256 sig_digest = pkrevokedid_sig_digest( pk, pub_key_info.nonce );
+   const checksum256 sig_digest = pkdidrevoke_sig_digest( pk, pub_key_info.nonce );
    check_pk_did_signature( pub_key_info.pkid, pk, sig_digest, sig );
 
    pub_key_did_table pk_did_db( get_self(), get_self().value );
