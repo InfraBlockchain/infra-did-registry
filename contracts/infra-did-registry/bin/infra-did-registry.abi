@@ -1,0 +1,270 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.2",
+    "types": [],
+    "structs": [
+        {
+            "name": "accclearattr",
+            "base": "",
+            "fields": [
+                {
+                    "name": "account",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "account_did_attr",
+            "base": "",
+            "fields": [
+                {
+                    "name": "account",
+                    "type": "name"
+                },
+                {
+                    "name": "attr",
+                    "type": "pair_string_string[]"
+                }
+            ]
+        },
+        {
+            "name": "accsetattr",
+            "base": "",
+            "fields": [
+                {
+                    "name": "account",
+                    "type": "name"
+                },
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "global_state",
+            "base": "",
+            "fields": [
+                {
+                    "name": "next_pkid",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "pair_string_string",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "pkchowner",
+            "base": "",
+            "fields": [
+                {
+                    "name": "pk",
+                    "type": "public_key"
+                },
+                {
+                    "name": "new_owner_pk",
+                    "type": "public_key"
+                },
+                {
+                    "name": "sig",
+                    "type": "signature"
+                },
+                {
+                    "name": "ram_payer",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "pkdidclear",
+            "base": "",
+            "fields": [
+                {
+                    "name": "pk",
+                    "type": "public_key"
+                },
+                {
+                    "name": "sig",
+                    "type": "signature"
+                }
+            ]
+        },
+        {
+            "name": "pkdidrevoke",
+            "base": "",
+            "fields": [
+                {
+                    "name": "pk",
+                    "type": "public_key"
+                },
+                {
+                    "name": "sig",
+                    "type": "signature"
+                },
+                {
+                    "name": "ram_payer",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "pkdidrmvrvkd",
+            "base": "",
+            "fields": [
+                {
+                    "name": "pkid",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "pksetattr",
+            "base": "",
+            "fields": [
+                {
+                    "name": "pk",
+                    "type": "public_key"
+                },
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "string"
+                },
+                {
+                    "name": "sig",
+                    "type": "signature"
+                },
+                {
+                    "name": "ram_payer",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "pub_key_did",
+            "base": "",
+            "fields": [
+                {
+                    "name": "pkid",
+                    "type": "uint64"
+                },
+                {
+                    "name": "pk",
+                    "type": "public_key"
+                },
+                {
+                    "name": "nonce",
+                    "type": "uint16"
+                },
+                {
+                    "name": "attr",
+                    "type": "pair_string_string[]"
+                }
+            ]
+        },
+        {
+            "name": "pub_key_did_owner",
+            "base": "",
+            "fields": [
+                {
+                    "name": "pkid",
+                    "type": "uint64"
+                },
+                {
+                    "name": "owner_pk",
+                    "type": "public_key"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "accclearattr",
+            "type": "accclearattr",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "accsetattr",
+            "type": "accsetattr",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "pkchowner",
+            "type": "pkchowner",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "pkdidclear",
+            "type": "pkdidclear",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "pkdidrevoke",
+            "type": "pkdidrevoke",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "pkdidrmvrvkd",
+            "type": "pkdidrmvrvkd",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "pksetattr",
+            "type": "pksetattr",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "accdidattr",
+            "type": "account_did_attr",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "global",
+            "type": "global_state",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "pkdidowner",
+            "type": "pub_key_did_owner",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "pubkeydid",
+            "type": "pub_key_did",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "kv_tables": {},
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": []
+}

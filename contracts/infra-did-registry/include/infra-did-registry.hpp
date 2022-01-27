@@ -81,6 +81,14 @@ namespace infra_did {
          [[eosio::action]]
          void pkdidclear( const public_key& pk, const signature& sig );
 
+         /**
+          * [Public Key DID] remove revoked did data
+          *
+          * @param pkid
+          */
+         [[eosio::action]]
+         void pkdidrmvrvkd( const uint64_t pkid );
+
       private:
 
          checksum256 pksetattr_sig_digest( const public_key& pk, const uint16_t nonce, const string& key, const string& value );
@@ -104,7 +112,7 @@ namespace infra_did {
          struct [[eosio::table]] pub_key_did {
             uint64_t   pkid; // public key id
             public_key pk; // only supports ecc_public_key(secp256k1, secp256r1) (33 bytes compressed key format)
-            uint16_t   nonce; // allows upto 65535 update transactions per a pub-key did
+            uint16_t   nonce; // allows upto 65535 update transactions per a pub-key did. to revoke pub-key did, did owner should set nonce value as 65535
             std::map<string, string> attr;
 
             uint64_t primary_key() const { return pkid; }

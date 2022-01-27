@@ -144,6 +144,8 @@ void infra_did_registry::pkdidrevoke( const public_key& pk, const signature& sig
    pub_key_did_table pk_did_db( get_self(), get_self().value );
 
    if ( pub_key_info.pkid == 0 ) {
+      require_auth( ram_payer );
+
       uint64_t pkid = get_next_pkid();
 
       pk_did_db.emplace( ram_payer, [&]( pub_key_did& pk_did ) {
@@ -188,6 +190,25 @@ void infra_did_registry::pkdidclear( const public_key& pk, const signature& sig 
       if ( itr_pk_did_owner != pk_did_owner_db.end() ) {
          pk_did_owner_db.erase(itr_pk_did_owner);
       }
+   }
+}
+
+void infra_did_registry::pkdidrmvrvkd( const uint64_t pkid ) {
+
+   require_auth( get_self() );
+
+   pub_key_did_table pk_did_db( get_self(), get_self().value );
+   auto itr_pk_did = pk_did_db.find( pkid );
+
+   check( itr_pk_did != pk_did_db.end(), "no entry on pubkeydid table" );
+   check( itr_pk_did->nonce == INFRA_DID_NONCE_VALUE_FOR_REVOKED_PUB_KEY_DID, "not revoked did" );
+
+   pk_did_db.erase( itr_pk_did );
+
+   pub_key_did_owner_table pk_did_owner_db( get_self(), get_self().value );
+   auto itr_pk_did_owner = pk_did_owner_db.find( pkid );
+   if ( itr_pk_did_owner != pk_did_owner_db.end() ) {
+      pk_did_owner_db.erase( itr_pk_did_owner );
    }
 }
 
