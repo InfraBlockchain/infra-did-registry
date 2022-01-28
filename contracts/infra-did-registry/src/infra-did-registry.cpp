@@ -212,6 +212,33 @@ void infra_did_registry::pkdidrmvrvkd( const uint64_t pkid ) {
    }
 }
 
+void infra_did_registry::pkdidrmvrvkr( const uint64_t pkidlb, const uint16_t cnt ) {
+
+   require_auth( get_self() );
+
+   pub_key_did_table pk_did_db( get_self(), get_self().value );
+   auto itr_pk_did = pk_did_db.lower_bound( pkidlb );
+
+   bool removed = false;
+   uint16_t offset = 0;
+   while ( offset < cnt && itr_pk_did != pk_did_db.end() ) {
+      auto itr_pk_did_current = itr_pk_did;
+      itr_pk_did++;
+      offset++;
+      if ( itr_pk_did->nonce == INFRA_DID_NONCE_VALUE_FOR_REVOKED_PUB_KEY_DID ) {
+         pub_key_did_owner_table pk_did_owner_db( get_self(), get_self().value );
+         auto itr_pk_did_owner = pk_did_owner_db.find( itr_pk_did_current->pkid );
+         if ( itr_pk_did_owner != pk_did_owner_db.end() ) {
+            pk_did_owner_db.erase( itr_pk_did_owner );
+         }
+         pk_did_db.erase( itr_pk_did_current );
+         removed = true;
+      }
+   }
+
+   check( removed, "no entry to remove" );
+}
+
 infra_did_registry::pub_key_id_t infra_did_registry::get_pub_key_id_info( const public_key& pk ) {
    pub_key_did_table pk_did_db( get_self(), get_self().value );
    auto pk_index = pk_did_db.get_index<"bypk"_n>();

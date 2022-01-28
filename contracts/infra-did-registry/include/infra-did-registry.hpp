@@ -89,6 +89,15 @@ namespace infra_did {
          [[eosio::action]]
          void pkdidrmvrvkd( const uint64_t pkid );
 
+        /**
+         * [Public Key DID] remove revoked did in range
+         *
+         * @param pkidlb pkid lower bound
+         * @param cnt
+         */
+        [[eosio::action]]
+        void pkdidrmvrvkr( const uint64_t pkidlb, const uint16_t cnt );
+
       private:
 
          checksum256 pksetattr_sig_digest( const public_key& pk, const uint16_t nonce, const string& key, const string& value );
