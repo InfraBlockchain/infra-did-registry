@@ -134,6 +134,20 @@
             ]
         },
         {
+            "name": "pkdidrmvrvkr",
+            "base": "",
+            "fields": [
+                {
+                    "name": "pkidlb",
+                    "type": "uint64"
+                },
+                {
+                    "name": "cnt",
+                    "type": "uint16"
+                }
+            ]
+        },
+        {
             "name": "pksetattr",
             "base": "",
             "fields": [
@@ -225,6 +239,11 @@
         {
             "name": "pkdidrmvrvkd",
             "type": "pkdidrmvrvkd",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "pkdidrmvrvkr",
+            "type": "pkdidrmvrvkr",
             "ricardian_contract": ""
         },
         {
