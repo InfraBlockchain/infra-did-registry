@@ -89,6 +89,25 @@ namespace infra_did {
          [[eosio::action]]
          void pkdidrmvrvkd( const uint64_t pkid );
 
+         /**
+          * [Public Key DID] register did as trusted
+          *
+          * @param ram_payer
+          * @param pk
+          * @param metadata
+          */
+         [[eosio::action]]
+         void pkaddtrusted(const name& ram_payer, const public_key& pk, const string& metadata);
+
+         /**
+          * [Public Key DID] deregister did as trusted
+          *
+          * @param ram_payer
+          * @param pk
+          */
+         [[eosio::action]]
+         void pkrmtrusted(const name& ram_payer, const public_key& pk);
+
       private:
 
          checksum256 pksetattr_sig_digest( const public_key& pk, const uint16_t nonce, const string& key, const string& value );
