@@ -146,6 +146,22 @@ namespace infra_did {
 
          typedef eosio::multi_index< "pkdidowner"_n, pub_key_did_owner > pub_key_did_owner_table;
 
+         struct [[eosio::table]] trusted_did {
+            uint64_t id; // unique identifier
+            public_key pk;  // only supports ecc_public_key(secp256k1, secp256r1) (33 bytes compressed key format)
+            string metadata; // metadata for the DID, stringified JSON
+            
+            uint64_t primary_key() const { return id; }
+            checksum256 by_pk() const { return get_pubkey_index_value(pk); } // secondary index for public key
+
+            EOSLIB_SERIALIZE( trusted_did, (id)(pk)(metadata) )
+         };
+
+         typedef eosio::multi_index< "trusteddid"_n, 
+            trusted_did,
+            indexed_by<"bypk"_n, const_mem_fun<trusted_did, checksum256, &trusted_did::by_pk>>
+         > trusted_did_table;
+
          struct [[eosio::table("global")]] global_state {
             global_state() { }
             uint64_t next_pkid;
