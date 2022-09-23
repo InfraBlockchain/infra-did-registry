@@ -165,6 +165,7 @@ namespace infra_did {
 
          typedef eosio::multi_index< "pkdidowner"_n, pub_key_did_owner > pub_key_did_owner_table;
 
+         // authorizer account can add trusted DID in trusted_did table with scope as authorizer account name
          struct [[eosio::table]] trusted_did {
             uint64_t id; // unique identifier
             public_key pk;  // only supports ecc_public_key(secp256k1, secp256r1) (33 bytes compressed key format)
