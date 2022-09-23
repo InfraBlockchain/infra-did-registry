@@ -90,23 +90,33 @@ namespace infra_did {
          void pkdidrmvrvkd( const uint64_t pkid );
 
          /**
-          * [Public Key DID] register did as trusted
+          * [Public Key DID] register did as authorized
           *
-          * @param ram_payer
+          * @param authorizer
           * @param pk
-          * @param metadata
+          * @param properties
           */
          [[eosio::action]]
-         void pkaddtrusted(const name& ram_payer, const public_key& pk, const string& metadata);
+         void pkauthreg(const name& authorizer, const public_key& pk, const string& properties);
 
          /**
-          * [Public Key DID] deregister did as trusted
+          * [Public Key DID] update properties of authorized did
           *
-          * @param ram_payer
+          * @param authorizer
+          * @param pk
+          * @param properties
+          */
+         [[eosio::action]]
+         void pkauthupdate(const name& authorizer, const public_key& pk, const string& properties);
+
+         /**
+          * [Public Key DID] deregister did as authorized
+          *
+          * @param authorizer
           * @param pk
           */
          [[eosio::action]]
-         void pkrmtrusted(const name& ram_payer, const public_key& pk);
+         void pkauthremove(const name& authorizer, const public_key& pk);
 
       private:
 
@@ -165,22 +175,22 @@ namespace infra_did {
 
          typedef eosio::multi_index< "pkdidowner"_n, pub_key_did_owner > pub_key_did_owner_table;
 
-         // authorizer account can add trusted DID in trusted_did table with scope as authorizer account name
-         struct [[eosio::table]] trusted_did {
+         // authorizer account can add authorized DID in authorized_pub_key_did table with scope as authorizer account name
+         struct [[eosio::table]] authorized_pub_key_did {
             uint64_t id; // unique identifier
             public_key pk;  // only supports ecc_public_key(secp256k1, secp256r1) (33 bytes compressed key format)
-            string metadata; // metadata for the DID, stringified JSON
+            string properties; // properties for the DID, stringified JSON
             
             uint64_t primary_key() const { return id; }
             checksum256 by_pk() const { return get_pubkey_index_value(pk); } // secondary index for public key
 
-            EOSLIB_SERIALIZE( trusted_did, (id)(pk)(metadata) )
+            EOSLIB_SERIALIZE( authorized_pub_key_did, (id)(pk)(properties) )
          };
 
-         typedef eosio::multi_index< "trusteddid"_n, 
-            trusted_did,
-            indexed_by<"bypk"_n, const_mem_fun<trusted_did, checksum256, &trusted_did::by_pk>>
-         > trusted_did_table;
+         typedef eosio::multi_index< "authpkdid"_n, 
+            authorized_pub_key_did,
+            indexed_by<"bypk"_n, const_mem_fun<authorized_pub_key_did, checksum256, &authorized_pub_key_did::by_pk>>
+         > authorized_pub_key_did_table;
 
          struct [[eosio::table("global")]] global_state {
             global_state() { }
