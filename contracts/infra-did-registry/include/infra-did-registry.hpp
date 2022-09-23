@@ -41,6 +41,35 @@ namespace infra_did {
          void accclearattr( const name& account );
 
          /**
+          * [Account DID] register did as authorized
+          *
+          * @param authorizer
+          * @param account
+          * @param properties
+          */
+         [[eosio::action]]
+         void accauthreg(const name& authorizer, const name& account, const string& properties);
+
+         /**
+          * [Account DID] update properties of authorized did
+          *
+          * @param authorizer
+          * @param account
+          * @param properties
+          */
+         [[eosio::action]]
+         void accauthupdt(const name& authorizer, const name& account, const string& properties);
+
+         /**
+          * [Account DID] deregister did as authorized
+          *
+          * @param authorizer
+          * @param account
+          */
+         [[eosio::action]]
+         void accauthrm(const name& authorizer, const name& account);
+
+         /**
           * [Public Key DID] set attribute for a DID
           *
           * @param pk
@@ -191,6 +220,23 @@ namespace infra_did {
             authorized_pub_key_did,
             indexed_by<"bypk"_n, const_mem_fun<authorized_pub_key_did, checksum256, &authorized_pub_key_did::by_pk>>
          > authorized_pub_key_did_table;
+
+         // authorizer account can add authorized DID in authorized_account_did table with scope as authorizer account name
+         struct [[eosio::table]] authorized_account_did {
+            uint64_t id; // unique identifier
+            name account;
+            string properties; // properties for the DID, stringified JSON
+            
+            uint64_t primary_key() const { return id; }
+            uint64_t by_account() const { return account.value; } // secondary index for account
+
+            EOSLIB_SERIALIZE( authorized_account_did, (id)(account)(properties) )
+         }; 
+
+         typedef eosio::multi_index< "authaccdid"_n, 
+            authorized_account_did,
+            indexed_by<"byaccount"_n, const_mem_fun<authorized_account_did, uint64_t, &authorized_account_did::by_account>>
+         > authorized_account_did_table;
 
          struct [[eosio::table("global")]] global_state {
             global_state() { }
