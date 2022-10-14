@@ -41,33 +41,33 @@ namespace infra_did {
          void accclearattr( const name& account );
 
          /**
-          * [Account DID] register did as authorized
+          * [Account DID] register did as trusted
           *
-          * @param authorizer
+          * @param trusted
           * @param account
           * @param properties
           */
          [[eosio::action]]
-         void accauthreg(const name& authorizer, const name& account, const string& properties);
+         void acctrstdreg(const name& trusted, const name& account, const string& properties);
 
          /**
-          * [Account DID] update properties of authorized did
+          * [Account DID] update properties of trusted did
           *
-          * @param authorizer
+          * @param trusted
           * @param account
           * @param properties
           */
          [[eosio::action]]
-         void accauthupdt(const name& authorizer, const name& account, const string& properties);
+         void acctrstdupdt(const name& trusted, const name& account, const string& properties);
 
          /**
-          * [Account DID] deregister did as authorized
+          * [Account DID] deregister did as trusted
           *
-          * @param authorizer
+          * @param trusted
           * @param account
           */
          [[eosio::action]]
-         void accauthrm(const name& authorizer, const name& account);
+         void acctrstdrmv(const name& trusted, const name& account);
 
          /**
           * [Public Key DID] set attribute for a DID
@@ -119,33 +119,33 @@ namespace infra_did {
          void pkdidrmvrvkd( const uint64_t pkid );
 
          /**
-          * [Public Key DID] register did as authorized
+          * [Public Key DID] register did as trusted
           *
-          * @param authorizer
+          * @param trusted
           * @param pk
           * @param properties
           */
          [[eosio::action]]
-         void pkauthreg(const name& authorizer, const public_key& pk, const string& properties);
+         void pktrstdreg(const name& trusted, const public_key& pk, const string& properties);
 
          /**
-          * [Public Key DID] update properties of authorized did
+          * [Public Key DID] update properties of trusted did
           *
-          * @param authorizer
+          * @param trusted
           * @param pk
           * @param properties
           */
          [[eosio::action]]
-         void pkauthupdate(const name& authorizer, const public_key& pk, const string& properties);
+         void pktrstdupdt(const name& trusted, const public_key& pk, const string& properties);
 
          /**
-          * [Public Key DID] deregister did as authorized
+          * [Public Key DID] deregister did as trusted
           *
-          * @param authorizer
+          * @param trusted
           * @param pk
           */
          [[eosio::action]]
-         void pkauthremove(const name& authorizer, const public_key& pk);
+         void pktrstdrmv(const name& trusted, const public_key& pk);
 
       private:
 
@@ -204,8 +204,8 @@ namespace infra_did {
 
          typedef eosio::multi_index< "pkdidowner"_n, pub_key_did_owner > pub_key_did_owner_table;
 
-         // authorizer account can add authorized DID in authorized_pub_key_did table with scope as authorizer account name
-         struct [[eosio::table]] authorized_pub_key_did {
+         // trusted account can add trusted DID in trusted_pub_key_did table with scope as trusted account name
+         struct [[eosio::table]] trusted_pub_key_did {
             uint64_t id; // unique identifier
             public_key pk;  // only supports ecc_public_key(secp256k1, secp256r1) (33 bytes compressed key format)
             string properties; // properties for the DID, stringified JSON
@@ -213,16 +213,16 @@ namespace infra_did {
             uint64_t primary_key() const { return id; }
             checksum256 by_pk() const { return get_pubkey_index_value(pk); } // secondary index for public key
 
-            EOSLIB_SERIALIZE( authorized_pub_key_did, (id)(pk)(properties) )
+            EOSLIB_SERIALIZE( trusted_pub_key_did, (id)(pk)(properties) )
          };
 
-         typedef eosio::multi_index< "authpkdid"_n, 
-            authorized_pub_key_did,
-            indexed_by<"bypk"_n, const_mem_fun<authorized_pub_key_did, checksum256, &authorized_pub_key_did::by_pk>>
-         > authorized_pub_key_did_table;
+         typedef eosio::multi_index< "trstdpkdid"_n, 
+            trusted_pub_key_did,
+            indexed_by<"bypk"_n, const_mem_fun<trusted_pub_key_did, checksum256, &trusted_pub_key_did::by_pk>>
+         > trusted_pub_key_did_table;
 
-         // authorizer account can add authorized DID in authorized_account_did table with scope as authorizer account name
-         struct [[eosio::table]] authorized_account_did {
+         // trusted account can add trusted DID in trusted_account_did table with scope as trusted account name
+         struct [[eosio::table]] trusted_account_did {
             uint64_t id; // unique identifier
             name account;
             string properties; // properties for the DID, stringified JSON
@@ -230,13 +230,13 @@ namespace infra_did {
             uint64_t primary_key() const { return id; }
             uint64_t by_account() const { return account.value; } // secondary index for account
 
-            EOSLIB_SERIALIZE( authorized_account_did, (id)(account)(properties) )
+            EOSLIB_SERIALIZE( trusted_account_did, (id)(account)(properties) )
          }; 
 
-         typedef eosio::multi_index< "authaccdid"_n, 
-            authorized_account_did,
-            indexed_by<"byaccount"_n, const_mem_fun<authorized_account_did, uint64_t, &authorized_account_did::by_account>>
-         > authorized_account_did_table;
+         typedef eosio::multi_index< "trstdaccdid"_n, 
+            trusted_account_did,
+            indexed_by<"byaccount"_n, const_mem_fun<trusted_account_did, uint64_t, &trusted_account_did::by_account>>
+         > trusted_account_did_table;
 
          struct [[eosio::table("global")]] global_state {
             global_state() { }
