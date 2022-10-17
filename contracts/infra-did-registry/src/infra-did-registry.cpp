@@ -54,7 +54,7 @@ void infra_did_registry::acctrstdreg(const name& authorizer, const name& account
          check( false, "already registered" );
       }
    }
-
+   get_auth_acc(authorizer, account);
    trusted_account_did_db.emplace( authorizer, [&]( trusted_account_did& trusted_did ) {
       trusted_did.id = trusted_account_did_db.available_primary_key();
       trusted_did.authorizer = authorizer;

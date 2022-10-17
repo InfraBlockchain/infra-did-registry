@@ -207,13 +207,14 @@ namespace infra_did {
          // trusted account can add trusted DID in trusted_pub_key_did table with scope as contract account name
          struct [[eosio::table]] trusted_pub_key_did {
             uint64_t id; // unique identifier
-            name authorizer; // authorizer account name
+            name authorizer; // trusted account name
             public_key pk;  // only supports ecc_public_key(secp256k1, secp256r1) (33 bytes compressed key format)
             string properties; // properties for the DID, stringified JSON
             
             uint64_t primary_key() const { return id; }
             uint64_t by_authorizer() const { return authorizer.value; } // secondary index for trusted account
             checksum256 by_pk() const { return get_pubkey_index_value(pk); } // secondary index for public key
+            checksum256 by_authpk() const { return get_auth_pk(authorizer, pk); } // secondary index for authorizer and public key
 
             EOSLIB_SERIALIZE( trusted_pub_key_did, (id)(authorizer)(pk)(properties) )
          };
@@ -221,19 +222,21 @@ namespace infra_did {
          typedef eosio::multi_index< "trstdpkdid"_n, 
             trusted_pub_key_did,
             indexed_by<"byauthorizer"_n, const_mem_fun<trusted_pub_key_did, uint64_t, &trusted_pub_key_did::by_authorizer>>,
-            indexed_by<"bypk"_n, const_mem_fun<trusted_pub_key_did, checksum256, &trusted_pub_key_did::by_pk>>
+            indexed_by<"bypk"_n, const_mem_fun<trusted_pub_key_did, checksum256, &trusted_pub_key_did::by_pk>>,
+            indexed_by<"byauthpk"_n, const_mem_fun<trusted_pub_key_did, checksum256, &trusted_pub_key_did::by_authpk>>
          > trusted_pub_key_did_table;
 
          // trusted account can add trusted DID in trusted_account_did table with scope as contract account name
          struct [[eosio::table]] trusted_account_did {
             uint64_t id; // unique identifier
-            name authorizer; // authorizer account name
+            name authorizer; // trusted account name
             name account; // trusted account name
             string properties; // properties for the DID, stringified JSON
             
             uint64_t primary_key() const { return id; }
             uint64_t by_authorizer() const { return authorizer.value; } // secondary index for trusted account
             uint64_t by_account() const { return account.value; } // secondary index for account
+            uint128_t by_authacc() const { return get_auth_acc(authorizer, account); } // secondary index for authorizer and account
 
             EOSLIB_SERIALIZE( trusted_account_did, (id)(authorizer)(account)(properties) )
          }; 
@@ -241,7 +244,8 @@ namespace infra_did {
          typedef eosio::multi_index< "trstdaccdid"_n, 
             trusted_account_did,
             indexed_by<"byauthorizer"_n, const_mem_fun<trusted_account_did, uint64_t, &trusted_account_did::by_authorizer>>,
-            indexed_by<"byaccount"_n, const_mem_fun<trusted_account_did, uint64_t, &trusted_account_did::by_account>>
+            indexed_by<"byaccount"_n, const_mem_fun<trusted_account_did, uint64_t, &trusted_account_did::by_account>>,
+            indexed_by<"byauthacc"_n, const_mem_fun<trusted_account_did, uint128_t, &trusted_account_did::by_authacc>>
          > trusted_account_did_table;
 
          struct [[eosio::table("global")]] global_state {
@@ -280,6 +284,30 @@ namespace infra_did {
             //buf[0] = var_i;
             std::copy(std::begin(ecc_pk)+1, std::end(ecc_pk), std::begin(buf));
 
+            return checksum256(buf);
+         }
+
+         static uint128_t get_auth_acc(const name &authorizer, const name &account) {
+            const uint64_t authorizer_value = authorizer.value;
+            const uint64_t account_value = account.value;
+            return (uint128_t(authorizer_value) << 64) | account_value;
+         }
+
+         static checksum256 get_auth_pk(const name &authorizer, const public_key &pk) {
+            const uint64_t authorizer_value = authorizer.value;
+            unsigned char authorizer_char[sizeof(authorizer_value)];
+            std::memcpy(authorizer_char,&authorizer_value,sizeof(authorizer_value));
+
+            size_t var_idx = pk.index();
+            // only support ecc_public_key (33 bytes compressed key format)
+            check(var_idx <= 1, "not supported public_key type");
+
+            auto& ecc_pk = var_idx == 0 ? std::get<0>(pk) : std::get<1>(pk); // secp256k1 or secp256r1
+
+            std::array<unsigned char, 32> buf;
+            //buf[0] = var_i;
+            std::copy(std::begin(authorizer_char), std::end(authorizer_char), std::begin(buf));
+            std::copy(std::begin(ecc_pk)+9, std::end(ecc_pk), std::begin(buf)+8);
             return checksum256(buf);
          }
    };
