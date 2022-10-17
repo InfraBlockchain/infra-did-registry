@@ -42,37 +42,37 @@ void infra_did_registry::accclearattr( const name& account ) {
    }
 }
 
-void infra_did_registry::acctrstdreg(const name& trusted, const name& account, const string& properties){
+void infra_did_registry::acctrstdreg(const name& authorizer, const name& account, const string& properties){
    
-   require_auth(trusted);
+   require_auth(authorizer);
    trusted_account_did_table trusted_account_did_db( get_self(), get_self().value );
    auto pk_index = trusted_account_did_db.get_index<"byaccount"_n>();
    auto itr_trusted_did_idx = pk_index.find(account.value);
 
    for(auto itr = itr_trusted_did_idx; itr != pk_index.end(); itr++){
-      if(itr->trusted == trusted){
+      if(itr->authorizer == authorizer){
          check( false, "already registered" );
       }
    }
 
-   trusted_account_did_db.emplace( trusted, [&]( trusted_account_did& trusted_did ) {
+   trusted_account_did_db.emplace( authorizer, [&]( trusted_account_did& trusted_did ) {
       trusted_did.id = trusted_account_did_db.available_primary_key();
-      trusted_did.trusted = trusted;
+      trusted_did.authorizer = authorizer;
       trusted_did.account = account;
       trusted_did.properties = properties;
    });
 }
 
-void infra_did_registry::acctrstdupdt(const name& trusted, const name& account, const string& properties){
+void infra_did_registry::acctrstdupdt(const name& authorizer, const name& account, const string& properties){
    
-   require_auth(trusted);
+   require_auth(authorizer);
    trusted_account_did_table trusted_did_db( get_self(), get_self().value );
    auto pk_index = trusted_did_db.get_index<"byaccount"_n>();
    auto itr_trusted_did_idx = pk_index.find(account.value);
 
    bool is_registered = false;
    for(auto itr = itr_trusted_did_idx; itr != pk_index.end(); itr++){
-      if(itr->trusted == trusted){
+      if(itr->authorizer == authorizer){
          pk_index.modify( itr, same_payer, [&]( trusted_account_did& trusted_did ) {
             trusted_did.properties = properties;
          });
@@ -83,16 +83,16 @@ void infra_did_registry::acctrstdupdt(const name& trusted, const name& account, 
    check( is_registered, "not registered" );
 }
 
-void infra_did_registry::acctrstdrmv(const name& trusted, const name& account){
+void infra_did_registry::acctrstdrmv(const name& authorizer, const name& account){
    
-   require_auth(trusted);
+   require_auth(authorizer);
    trusted_account_did_table trusted_did_db( get_self(), get_self().value );
    auto pk_index = trusted_did_db.get_index<"byaccount"_n>();
    auto itr_trusted_did_idx = pk_index.find(account.value);
 
    bool is_registered = false;
    for(auto itr = itr_trusted_did_idx; itr != pk_index.end(); itr++){
-      if(itr->trusted == trusted){
+      if(itr->authorizer == authorizer){
          pk_index.erase(itr);
          return;
       }
@@ -271,37 +271,37 @@ void infra_did_registry::pkdidrmvrvkd( const uint64_t pkid ) {
    }
 }
 
-void infra_did_registry::pktrstdreg(const name& trusted, const public_key& pk, const string& properties){
+void infra_did_registry::pktrstdreg(const name& authorizer, const public_key& pk, const string& properties){
    
-   require_auth(trusted);
+   require_auth(authorizer);
    trusted_pub_key_did_table trusted_did_db( get_self(), get_self().value );
    auto pk_index = trusted_did_db.get_index<"bypk"_n>();
    auto itr_trusted_did_idx = pk_index.find(get_pubkey_index_value(pk));
 
    for(auto itr = itr_trusted_did_idx; itr != pk_index.end(); itr++){
-      if(itr->trusted == trusted){
+      if(itr->authorizer == authorizer){
          check( false, "already registered" );
       }
    }
 
-   trusted_did_db.emplace( trusted, [&]( trusted_pub_key_did& trusted_did ) {
+   trusted_did_db.emplace( authorizer, [&]( trusted_pub_key_did& trusted_did ) {
       trusted_did.id = trusted_did_db.available_primary_key();
-      trusted_did.trusted = trusted;
+      trusted_did.authorizer = authorizer;
       trusted_did.pk = pk;
       trusted_did.properties = properties;
    });
 }
 
-void infra_did_registry::pktrstdupdt(const name& trusted, const public_key& pk, const string& properties){
+void infra_did_registry::pktrstdupdt(const name& authorizer, const public_key& pk, const string& properties){
    
-   require_auth(trusted);
+   require_auth(authorizer);
    trusted_pub_key_did_table trusted_did_db( get_self(), get_self().value );
    auto pk_index = trusted_did_db.get_index<"bypk"_n>();
    auto itr_trusted_did_idx = pk_index.find(get_pubkey_index_value(pk));
 
    bool is_registered = false;
    for(auto itr = itr_trusted_did_idx; itr != pk_index.end(); itr++){
-      if(itr->trusted == trusted){
+      if(itr->authorizer == authorizer){
          pk_index.modify( itr, same_payer, [&]( trusted_pub_key_did& trusted_did ) {
             trusted_did.properties = properties;
          });
@@ -312,16 +312,16 @@ void infra_did_registry::pktrstdupdt(const name& trusted, const public_key& pk, 
    check( is_registered, "not registered" );
 }
 
-void infra_did_registry::pktrstdrmv(const name& trusted, const public_key& pk){
+void infra_did_registry::pktrstdrmv(const name& authorizer, const public_key& pk){
    
-   require_auth(trusted);
+   require_auth(authorizer);
    trusted_pub_key_did_table trusted_did_db( get_self(), get_self().value );
    auto pk_index = trusted_did_db.get_index<"bypk"_n>();
    auto itr_trusted_did_idx = pk_index.find(get_pubkey_index_value(pk));
 
    bool is_registered = false;
    for(auto itr = itr_trusted_did_idx; itr != pk_index.end(); itr++){
-      if(itr->trusted == trusted){
+      if(itr->authorizer == authorizer){
          pk_index.erase(itr);
          return;
       }

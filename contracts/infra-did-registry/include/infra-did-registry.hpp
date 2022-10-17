@@ -43,31 +43,31 @@ namespace infra_did {
          /**
           * [Account DID] register did as trusted
           *
-          * @param trusted
+          * @param authorizer
           * @param account
           * @param properties
           */
          [[eosio::action]]
-         void acctrstdreg(const name& trusted, const name& account, const string& properties);
+         void acctrstdreg(const name& authorizer, const name& account, const string& properties);
 
          /**
           * [Account DID] update properties of trusted did
           *
-          * @param trusted
+          * @param authorizer
           * @param account
           * @param properties
           */
          [[eosio::action]]
-         void acctrstdupdt(const name& trusted, const name& account, const string& properties);
+         void acctrstdupdt(const name& authorizer, const name& account, const string& properties);
 
          /**
           * [Account DID] deregister did as trusted
           *
-          * @param trusted
+          * @param authorizer
           * @param account
           */
          [[eosio::action]]
-         void acctrstdrmv(const name& trusted, const name& account);
+         void acctrstdrmv(const name& authorizer, const name& account);
 
          /**
           * [Public Key DID] set attribute for a DID
@@ -121,31 +121,31 @@ namespace infra_did {
          /**
           * [Public Key DID] register did as trusted
           *
-          * @param trusted
+          * @param authorizer
           * @param pk
           * @param properties
           */
          [[eosio::action]]
-         void pktrstdreg(const name& trusted, const public_key& pk, const string& properties);
+         void pktrstdreg(const name& authorizer, const public_key& pk, const string& properties);
 
          /**
           * [Public Key DID] update properties of trusted did
           *
-          * @param trusted
+          * @param authorizer
           * @param pk
           * @param properties
           */
          [[eosio::action]]
-         void pktrstdupdt(const name& trusted, const public_key& pk, const string& properties);
+         void pktrstdupdt(const name& authorizer, const public_key& pk, const string& properties);
 
          /**
           * [Public Key DID] deregister did as trusted
           *
-          * @param trusted
+          * @param authorizer
           * @param pk
           */
          [[eosio::action]]
-         void pktrstdrmv(const name& trusted, const public_key& pk);
+         void pktrstdrmv(const name& authorizer, const public_key& pk);
 
       private:
 
@@ -207,40 +207,40 @@ namespace infra_did {
          // trusted account can add trusted DID in trusted_pub_key_did table with scope as contract account name
          struct [[eosio::table]] trusted_pub_key_did {
             uint64_t id; // unique identifier
-            name trusted; // trusted account name
+            name authorizer; // authorizer account name
             public_key pk;  // only supports ecc_public_key(secp256k1, secp256r1) (33 bytes compressed key format)
             string properties; // properties for the DID, stringified JSON
             
             uint64_t primary_key() const { return id; }
-            uint64_t by_trusted() const { return trusted.value; } // secondary index for trusted account
+            uint64_t by_authorizer() const { return authorizer.value; } // secondary index for trusted account
             checksum256 by_pk() const { return get_pubkey_index_value(pk); } // secondary index for public key
 
-            EOSLIB_SERIALIZE( trusted_pub_key_did, (id)(trusted)(pk)(properties) )
+            EOSLIB_SERIALIZE( trusted_pub_key_did, (id)(authorizer)(pk)(properties) )
          };
 
          typedef eosio::multi_index< "trstdpkdid"_n, 
             trusted_pub_key_did,
-            indexed_by<"bytrusted"_n, const_mem_fun<trusted_pub_key_did, uint64_t, &trusted_pub_key_did::by_trusted>>,
+            indexed_by<"byauthorizer"_n, const_mem_fun<trusted_pub_key_did, uint64_t, &trusted_pub_key_did::by_authorizer>>,
             indexed_by<"bypk"_n, const_mem_fun<trusted_pub_key_did, checksum256, &trusted_pub_key_did::by_pk>>
          > trusted_pub_key_did_table;
 
          // trusted account can add trusted DID in trusted_account_did table with scope as contract account name
          struct [[eosio::table]] trusted_account_did {
             uint64_t id; // unique identifier
-            name trusted; // trusted account name
-            name account;
+            name authorizer; // authorizer account name
+            name account; // trusted account name
             string properties; // properties for the DID, stringified JSON
             
             uint64_t primary_key() const { return id; }
-            uint64_t by_trusted() const { return trusted.value; } // secondary index for trusted account
+            uint64_t by_authorizer() const { return authorizer.value; } // secondary index for trusted account
             uint64_t by_account() const { return account.value; } // secondary index for account
 
-            EOSLIB_SERIALIZE( trusted_account_did, (id)(trusted)(account)(properties) )
+            EOSLIB_SERIALIZE( trusted_account_did, (id)(authorizer)(account)(properties) )
          }; 
 
          typedef eosio::multi_index< "trstdaccdid"_n, 
             trusted_account_did,
-            indexed_by<"bytrusted"_n, const_mem_fun<trusted_account_did, uint64_t, &trusted_account_did::by_trusted>>,
+            indexed_by<"byauthorizer"_n, const_mem_fun<trusted_account_did, uint64_t, &trusted_account_did::by_authorizer>>,
             indexed_by<"byaccount"_n, const_mem_fun<trusted_account_did, uint64_t, &trusted_account_did::by_account>>
          > trusted_account_did_table;
 
