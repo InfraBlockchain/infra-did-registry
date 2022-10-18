@@ -214,7 +214,7 @@ namespace infra_did {
             uint64_t primary_key() const { return id; }
             uint64_t by_authorizer() const { return authorizer.value; } // secondary index for trusted account
             checksum256 by_pk() const { return get_pubkey_index_value(pk); } // secondary index for public key
-            checksum256 by_authpk() const { return get_auth_pk(authorizer, pk); } // secondary index for authorizer and public key
+            checksum256 by_authpk() const { return get_auth_pk_index_value(authorizer, pk); } // secondary index for authorizer and public key
 
             EOSLIB_SERIALIZE( trusted_pub_key_did, (id)(authorizer)(pk)(properties) )
          };
@@ -236,7 +236,7 @@ namespace infra_did {
             uint64_t primary_key() const { return id; }
             uint64_t by_authorizer() const { return authorizer.value; } // secondary index for trusted account
             uint64_t by_account() const { return account.value; } // secondary index for account
-            uint128_t by_authacc() const { return get_auth_acc(authorizer, account); } // secondary index for authorizer and account
+            uint128_t by_authacc() const { return get_auth_acc_index_value(authorizer, account); } // secondary index for authorizer and account
 
             EOSLIB_SERIALIZE( trusted_account_did, (id)(authorizer)(account)(properties) )
          }; 
@@ -287,16 +287,16 @@ namespace infra_did {
             return checksum256(buf);
          }
 
-         static uint128_t get_auth_acc(const name &authorizer, const name &account) {
+         static uint128_t get_auth_acc_index_value(const name &authorizer, const name &account) {
             const uint64_t authorizer_value = authorizer.value;
             const uint64_t account_value = account.value;
             return (uint128_t(authorizer_value) << 64) | account_value;
          }
 
-         static checksum256 get_auth_pk(const name &authorizer, const public_key &pk) {
+         static checksum256 get_auth_pk_index_value(const name &authorizer, const public_key &pk) {
             const uint64_t authorizer_value = authorizer.value;
-            unsigned char authorizer_char[sizeof(authorizer_value)];
-            std::memcpy(authorizer_char,&authorizer_value,sizeof(authorizer_value));
+            unsigned char authorizer_char_arr[sizeof(authorizer_value)];
+            std::memcpy(authorizer_char_arr,&authorizer_value,sizeof(authorizer_value));
 
             size_t var_idx = pk.index();
             // only support ecc_public_key (33 bytes compressed key format)
@@ -306,7 +306,7 @@ namespace infra_did {
 
             std::array<unsigned char, 32> buf;
             //buf[0] = var_i;
-            std::copy(std::begin(authorizer_char), std::end(authorizer_char), std::begin(buf));
+            std::copy(std::begin(authorizer_char_arr), std::end(authorizer_char_arr), std::begin(buf));
             std::copy(std::begin(ecc_pk)+9, std::end(ecc_pk), std::begin(buf)+8);
             return checksum256(buf);
          }
